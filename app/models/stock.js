@@ -6,10 +6,14 @@ const stockSchema = new Schema({
     type: String,
     required: true
   },
+  stop: {
+    type: Number,
+    required: true
+  },
   owner: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    // required: true
+    required: true
   },
   list: {
     type: Schema.Types.ObjectId,
