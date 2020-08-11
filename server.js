@@ -18,15 +18,16 @@ const stockRoutes = require('./app/routes/stock_routes')
 const listRoutes = require('./app/routes/list_routes')
 const userRoutes = require('./app/routes/user_routes')
 
-const requestLogger = require('./lib/request_logger.js')
+const requestLogger = require('./lib/request_logger')
 
 app.use(express.json())
-app.use(auth)
+app.use(express.urlencoded({ extended: true }))
 
+app.use(auth)
 app.use(requestLogger)
+app.use(userRoutes)
 app.use(stockRoutes)
 app.use(listRoutes)
-app.use(userRoutes)
 app.use(errorHandler)
 
 app.listen(port, () => console.log(`Example app listening on port: ${port}`))

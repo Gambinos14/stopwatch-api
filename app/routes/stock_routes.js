@@ -30,17 +30,32 @@ router.post('/stocks', tokenAuth, async (req, res, next) => {
   }
 })
 
+router.patch('/stocks/:id', tokenAuth, async (req, res, next) => {
+  try {
+    const update = req.body.stock
+    delete update.owner
+    const stock = await Stock.findById(req.params.id)
+    if (stock.owner.toString() !== req.user.id) {
+      throw new Unauthorized()
+    }
+    Object.assign(stock, update)
+    await stock.save()
+    res.status(200).json({ stock: stock})
+  } catch (err) {
+    next(err)
+  }
+})
+
 router.delete('/stocks/:id', tokenAuth, async (req, res, next) => {
   try {
     const stockId = req.params.id
     const stock = await Stock.findById(stockId)
     handle404(stock)
-    if (stock.owner.toString() === req.user.id) {
-      await stock.remove()
-      res.sendStatus(204)
-    } else {
+    if (stock.owner.toString() !== req.user.id) {
       throw new Unauthorized()
     }
+    await stock.remove()
+    res.sendStatus(204)
   } catch (err) {
     next(err)
   }
