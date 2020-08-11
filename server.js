@@ -11,13 +11,19 @@ mongoose.connect(db, {
   useCreateIndex: true
 })
 
+const auth = require('./lib/authentication')
+
 const errorHandler = require('./lib/error_handler')
 const stockRoutes = require('./app/routes/stock_routes')
 const listRoutes = require('./app/routes/list_routes')
 const userRoutes = require('./app/routes/user_routes')
 
-app.use(express.json())
+const requestLogger = require('./lib/request_logger.js')
 
+app.use(express.json())
+app.use(auth)
+
+app.use(requestLogger)
 app.use(stockRoutes)
 app.use(listRoutes)
 app.use(userRoutes)
