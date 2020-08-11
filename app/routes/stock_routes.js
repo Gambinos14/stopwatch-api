@@ -4,35 +4,46 @@ const router = express.Router()
 const Stock = require('../models/stock')
 
 const errors = require('../../lib/custom_errors')
-
 const handle404 = errors.check404
+const Unauthorized = errors.Unauthorized
 
-router.get('/stocks', (req, res, next) => {
-  Stock.find()
-    .then(stocks => {
-      res.status(200).json({stocks: stocks})
-    })
-    .catch(next)
+const passport = require('passport')
+const tokenAuth = passport.authenticate('bearer', { session: false })
+
+router.get('/stocks', tokenAuth, async (req, res, next) => {
+  try {
+    const stocks = await Stock.find({ owner: req.user.id })
+    res.status(200).json({ stock: stocks })
+  } catch (err) {
+    next(err)
+  }
 })
 
-router.post('/stocks', (req, res, next) => {
-  const newStock = req.body.stock
-
-  Stock.create(newStock)
-    .then(stock => {
-      res.status(201).json({stock: stock})
-    })
-    .catch(next)
+router.post('/stocks', tokenAuth, async (req, res, next) => {
+  try {
+    const newStock = req.body.stock
+    newStock.owner = req.user.id
+    const stock = await Stock.create(newStock)
+    res.status(201).json({ stock: stock })
+  } catch (err) {
+    next(err)
+  }
 })
 
-router.delete('/stocks/:id', (req, res, next) => {
-  const stockId = req.params.id
-  Stock.findByIdAndDelete(stockId)
-    .then(doc => {
-      handle404(doc)
+router.delete('/stocks/:id', tokenAuth, async (req, res, next) => {
+  try {
+    const stockId = req.params.id
+    const stock = await Stock.findById(stockId)
+    handle404(stock)
+    if (stock.owner.toString() === req.user.id) {
+      await stock.remove()
       res.sendStatus(204)
-    })
-    .catch(next)
+    } else {
+      throw new Unauthorized()
+    }
+  } catch (err) {
+    next(err)
+  }
 })
 
 module.exports = router
