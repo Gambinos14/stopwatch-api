@@ -2,7 +2,8 @@ const express = require('express')
 const app = express()
 const serverDevPort = 4741
 const port = process.env.PORT || serverDevPort
-
+const cors = require('cors')
+const clientDevPort = 3000
 // create database connection with mongoose
 const mongoose = require('mongoose')
 const db = require('./config/db')
@@ -20,6 +21,7 @@ const userRoutes = require('./app/routes/user_routes')
 
 const requestLogger = require('./lib/request_logger')
 
+app.use(cors({ origin: process.env.CLIENT_ORIGIN || `http://localhost:${clientDevPort}` }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 

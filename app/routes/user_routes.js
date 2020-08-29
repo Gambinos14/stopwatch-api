@@ -15,7 +15,7 @@ const User = require('../models/user')
 router.post('/sign-up', async (req, res, next) => {
   try {
     const creds = req.body.credentials
-    if (creds.email && creds.password === creds.password_confirmation) {
+    if (creds.email && creds.password === creds.passwordConfirmation) {
       const salt = await bcrypt.genSalt(10)
       const hash = await bcrypt.hash(creds.password, salt)
       const user = {
